@@ -17,6 +17,7 @@ getCommands commands = do
     map parseCommand commands
 
 spinTheDial :: Int -> [Int] -> Int
+spinTheDial 0 [] = 1  -- Exit out in the case of the empty list, this case handles when the last action landed on 0
 spinTheDial _ [] = 0  -- Exit out in the case of the empty list
 spinTheDial 0 commands = 1 + spinTheDial (head commands) (tail commands)
 spinTheDial n commands = spinTheDial ((n + head commands) `mod` 100) (tail commands)
