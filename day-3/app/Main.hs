@@ -7,15 +7,26 @@ import Data.Char
 readLines :: FilePath -> IO [String]
 readLines = fmap lines . readFile
 
-parifyList :: Int -> [Int] -> [(Int, Int)]
-parifyList _ [] = []
-parifyList n [a] = [(n, a)]
-parifyList n (x:sx) = (n, x) : parifyList n sx
+removeSmallestEffective :: [Int] -> [Int]
+removeSmallestEffective [] = []
+removeSmallestEffective [_] = []
+removeSmallestEffective (a:rest) =
+    let b = head rest in
+    if a >= b then a : removeSmallestEffective rest else rest
 
-parifySubsequent :: [Int] -> [(Int, Int)]
-parifySubsequent [] = []
-parifySubsequent [_] = []
-parifySubsequent (a:rest) = parifyList a rest ++ parifySubsequent rest
+processLine :: [Int] -> [Int] -> [Int]
+processLine [] _ = []
+processLine x [] = removeSmallestEffective x
+processLine x (y:sy) = processLine (removeSmallestEffective x ++ [y]) sy
+
+-- Multiplies the first argument by 10 (starting with zero) then adds it to the first element of the supplied list
+fromDigits :: [Int] -> Int
+fromDigits = foldl ((+).(*10)) 0
+
+getMaxFromLine :: [Int] -> Int
+getMaxFromLine line = do
+    let (starting, rest) = splitAt 13 line
+    fromDigits (processLine starting rest)
 
 main :: IO ()
 main = do
@@ -26,5 +37,4 @@ main = do
         _ -> let file = head args in do
             x <- readLines file
             let digits = map (map digitToInt) x
-            let getMaxFromLine line =  maximum (map (\(a,b)-> a * 10 + b) (parifySubsequent line))
             putStrLn("Result: " ++ show (sum (map getMaxFromLine digits)))
