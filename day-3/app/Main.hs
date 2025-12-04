@@ -23,18 +23,19 @@ processLine x (y:sy) = processLine (removeSmallestEffective x ++ [y]) sy
 fromDigits :: [Int] -> Int
 fromDigits = foldl ((+).(*10)) 0
 
-getMaxFromLine :: [Int] -> Int
-getMaxFromLine line = do
-    let (starting, rest) = splitAt 13 line
+getMaxFromLine :: Int -> [Int] -> Int
+getMaxFromLine num line = do
+    let (starting, rest) = splitAt (num + 1) line
     fromDigits (processLine starting rest)
 
 main :: IO ()
 main = do
-    putStrLn "Advent of Code - Day 3 - Part 1"
+    putStrLn "Advent of Code - Day 3"
     args <- getArgs
     case length args of
         0 -> putStrLn "Usage: Pass in the name of the file to parse!"
         _ -> let file = head args in do
             x <- readLines file
             let digits = map (map digitToInt) x
-            putStrLn("Result: " ++ show (sum (map getMaxFromLine digits)))
+            putStrLn("Result Part 1: " ++ show (sum (map (getMaxFromLine 2) digits)))
+            putStrLn("Result Part 2: " ++ show (sum (map (getMaxFromLine 12) digits)))
