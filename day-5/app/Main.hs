@@ -22,10 +22,23 @@ getIds (cur:rest) = do
     let ids = fmap read current
     getRange ids ++ getIds rest
 
-countFreshIngredients :: [Int] -> [Int] -> Int
+getOffsetRange :: [String] -> [(Int, Int)]
+getOffsetRange [] = []
+getOffsetRange (cur:rest) = do
+    let current = splitOn "-" cur
+    case fmap read current of
+        (f:l:_) -> (f, l - f) : getOffsetRange rest
+        _ -> getOffsetRange rest
+
+testIngredient :: Int -> (Int, Int) -> Bool
+testIngredient ingredient (s, d) =
+    let delta = ingredient - s in
+        delta >= 0 && delta <= d
+
+countFreshIngredients :: [(Int, Int)] -> [Int] -> Int
 countFreshIngredients _ [] = 0
 countFreshIngredients f (cur:rest) =
-    if cur `elem` f then 1 + countFreshIngredients f rest else countFreshIngredients f rest
+    if any (testIngredient cur) f then 1 + countFreshIngredients f rest else countFreshIngredients f rest
 
 main :: IO ()
 main = do
@@ -37,7 +50,7 @@ main = do
             rawLines <- readLines file
             case splitOn [""] rawLines of
                 (ranges:rawIngredients:_) -> do
-                    let freshIngredients = getIds ranges
+                    let freshIngredients = getOffsetRange ranges
                     let ingredients = map read rawIngredients
                     putStrLn("Result: " ++ show (countFreshIngredients freshIngredients ingredients))
 
