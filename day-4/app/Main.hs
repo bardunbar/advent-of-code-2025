@@ -2,7 +2,7 @@ module Main where
 
 import System.Environment(getArgs)
 
-import Data.Vector (Vector, fromList, (!))
+import Data.Vector (Vector, fromList, (!), zipWith)
 import qualified Control.Applicative as Vector
 
 -- Read in all the lines of the file at FilePath to a list of strings
@@ -59,7 +59,13 @@ checkCell a acc index =
 
 processArea :: Area -> Int
 processArea a = do
-    sum (map (checkCell a 0) [0..(length (area a)-1)])
+    let foundCells = fromList $ map (checkCell a 0) [0..length (area a) - 1]
+    let foundCount = sum foundCells
+    if foundCount > 0 then
+        let newArea = Data.Vector.zipWith (\f v -> if f > 0 then ',' else v) foundCells (area a) in
+        sum foundCells + processArea (Area newArea (width a) (height a))
+    else
+        0
 
 main :: IO ()
 main = do
